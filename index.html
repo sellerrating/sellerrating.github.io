@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seller Rating</title>
+<meta name="description" content="اعرف تقييم أي بائع برقم موبايله قبل ما تحوّل — تقييمات موثّقة ببوليصات شحن حقيقية">
+<meta property="og:title" content="Seller Rating">
+<meta property="og:description" content="اعرف تقييم أي بائع برقم موبايله قبل ما تحوّل — تقييمات موثّقة ببوليصات شحن حقيقية">
+<meta property="og:type" content="website">
+
+<meta name="theme-color" content="#1D6FE8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Seller Rating">
+<link rel="manifest" id="mf" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-c-192.png">
+<link rel="apple-touch-icon" id="ati" href="icon-c-180.png">
+<style>
+  :root{--bg:#F3F5F9;--text:#111827;--muted:#6B7280;--accent:#1D6FE8;--card:#fff;color-scheme:light}
+  @media (prefers-color-scheme: dark){:root{--bg:#0D1016;--text:#E7EBF1;--muted:#9AA3B0;--card:#151A22;color-scheme:dark}}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Tahoma,'Segoe UI',Arial,sans-serif}
+  #app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg)}
+  #splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);z-index:2;transition:opacity .3s}
+  #splash img{width:76px;height:76px;border-radius:20px}
+  #splash b{font-size:17px}
+  #splash small{color:var(--muted);font-size:13px}
+  .spin{width:26px;height:26px;border:3px solid rgba(127,127,127,.25);border-top-color:var(--accent);border-radius:50%;animation:r .8s linear infinite}
+  @keyframes r{to{transform:rotate(360deg)}}
+  #slow{display:none;max-width:320px;text-align:center;font-size:13px;color:var(--muted);line-height:1.7;padding:0 16px}
+  #slow a{color:var(--accent);font-weight:700}
+  #install{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:3;display:none;align-items:center;gap:10px;background:var(--card);color:var(--text);border-radius:14px;padding:10px 12px;box-shadow:0 8px 28px rgba(0,0,0,.18);font-size:14px;max-width:520px;margin:0 auto}
+  #install img{width:36px;height:36px;border-radius:9px}
+  #install span{flex:1}
+  #install button{font:inherit;border:0;border-radius:10px;padding:8px 14px;cursor:pointer}
+  #inBtn{background:var(--accent);color:#fff;font-weight:700}
+  #inX{background:transparent;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="splash">
+  <img id="logo" src="icon-c-192.png" alt="">
+  <b>Seller Rating</b>
+  <div class="spin"></div>
+  <small>جاري التحميل…</small>
+  <p id="slow">التحميل أبطأ من المعتاد. لو الصفحة ماظهرتش، <a id="direct" href="#" target="_top">افتحها من هنا مباشرة</a>.<br>ولو فاتح أكتر من حساب جوجل على المتصفح، جرّب نافذة تصفح خفي.</p>
+</div>
+<div id="install"><img id="inIcon" src="icon-c-192.png" alt=""><span id="inText">ثبّت التطبيق على موبايلك</span><button id="inBtn" type="button">تثبيت</button><button id="inX" type="button" aria-label="إغلاق">✕</button></div>
+<iframe id="app" title="Seller Rating" allow="clipboard-write; web-share" referrerpolicy="no-referrer-when-downgrade"></iframe>
+<script>
+(function () {
+  var EXEC = "https://script.google.com/macros/s/AKfycbxqC9mLY1ityApykU8lwQixF9IYdvbPIeGAVv-ZJ5CtHQZIG3qDrptk9qKHiniFpE_mAQ/exec";
+  var path = location.pathname.replace(/\/index\.html$/, "").replace(/\/+$/, "");
+  var qs = new URLSearchParams(location.search);
+  var app = "customer", s = 0, r = false, m;
+  if ((m = path.match(/\/(s|r)\/(\d{1,7})$/))) { s = Number(m[2]); r = m[1] === "r"; }
+  else if (/\/seller$/.test(path)) app = "seller";
+  else if (/\/admin$/.test(path)) { location.replace(EXEC + "?app=admin"); return; }
+  // الروابط القصيرة: ?r=12 (تقييم) · ?s=12 (صفحة البائع) · ?seller · ?admin
+  var num = function (v) { return /^\d{1,7}$/.test(v || "") ? Number(v) : 0; };
+  if (num(qs.get("r"))) { s = num(qs.get("r")); r = true; }
+  else if (num(qs.get("s"))) { s = num(qs.get("s")); r = qs.get("r") === "1"; }
+  if (qs.has("seller") || qs.get("app") === "seller") app = "seller";
+  if (qs.has("admin")) { location.replace(EXEC + "?app=admin"); return; }
+
+  var target = EXEC + "?app=" + app + (s ? "&s=" + s : "") + (r ? "&r=1" : "");
+  document.getElementById("direct").href = target;
+
+  if (app === "seller") { // تطبيق البائع بأيقونة ولون مختلفين
+    document.getElementById("mf").href = "manifest-seller.webmanifest";
+    ["logo", "inIcon"].forEach(function (id) { document.getElementById(id).src = "icon-s-192.png"; });
+    document.getElementById("ati").href = "icon-s-180.png";
+    document.querySelector('meta[name="theme-color"]').content = "#6D3FD8";
+    document.title = "بوابة البائعين · Seller Rating";
+  }
+
+  var ifr = document.getElementById("app"), splash = document.getElementById("splash");
+  var slowT = setTimeout(function () { document.getElementById("slow").style.display = "block"; }, 12000);
+  ifr.addEventListener("load", function () {
+    clearTimeout(slowT);
+    setTimeout(function () { splash.style.opacity = "0"; setTimeout(function () { splash.style.display = "none"; }, 300); }, 700);
+  });
+  ifr.src = target;
+
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(function () {});
+
+  // زرار التثبيت
+  var box = document.getElementById("install"), deferred = null, KEY = "inst_dismiss_" + app;
+  function dismissed() { try { return Number(localStorage.getItem(KEY) || 0) > Date.now(); } catch (e) { return false; } }
+  function hide(days) { box.style.display = "none"; try { localStorage.setItem(KEY, String(Date.now() + days * 864e5)); } catch (e) {} }
+  var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault(); deferred = e;
+    if (!dismissed() && !standalone) setTimeout(function () { box.style.display = "flex"; }, 4000);
+  });
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (ios && !standalone && !dismissed()) {
+    document.getElementById("inText").textContent = "ثبّته: دوس «مشاركة» ⬆️ وبعدين «إضافة إلى الشاشة الرئيسية»";
+    document.getElementById("inBtn").style.display = "none";
+    setTimeout(function () { box.style.display = "flex"; }, 5000);
+  }
+  document.getElementById("inBtn").addEventListener("click", function () {
+    if (!deferred) return hide(7);
+    deferred.prompt(); deferred.userChoice.finally(function () { deferred = null; hide(365); });
+  });
+  document.getElementById("inX").addEventListener("click", function () { hide(14); });
+  window.addEventListener("appinstalled", function () { hide(3650); });
+})();
+</script>
+</body>
+</html>
